@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Launch Program",
+      "name": "Launch:local",
       "runtimeArgs": [
           "-r",
           "ts-node/register",
@@ -16,7 +16,25 @@
       ],
       "args": [
           "${workspaceFolder}/src/main.ts"
-      ]
-  }
-  ]
+      ],
+      "env": {
+        "NODE_ENV": "local"
+      }
+  }, {
+    "type": "node",
+    "request": "launch",
+    "name": "Launch:prod",
+    "runtimeArgs": [
+        "-r",
+        "ts-node/register",
+        "--loader",
+        "ts-node/esm"
+    ],
+    "args": [
+        "${workspaceFolder}/src/main.ts"
+    ],
+    "env": {
+      "NODE_ENV": "production"
+    }
+}]
 }
