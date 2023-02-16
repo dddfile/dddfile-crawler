@@ -1,4 +1,4 @@
-import { Dataset, createPlaywrightRouter, Log, KeyValueStore, enqueueLinks, PlaywrightCrawler, CrawlerAddRequestsOptions, RequestOptions, createRequestOptions, Dictionary, log, LoggerText } from 'crawlee';
+import { Dataset, createPlaywrightRouter, Log, KeyValueStore, enqueueLinks, PlaywrightCrawler, CrawlerAddRequestsOptions, RequestOptions, createRequestOptions, Dictionary } from 'crawlee';
 import { v4 as uuidv4 } from 'uuid';
 import { Locator, Page } from 'playwright';
 import ImageService from '../services/imageservice.js';
@@ -10,8 +10,7 @@ export const router = createPlaywrightRouter();
 let store: KeyValueStore;
 let crawlSite: Entities.CrawlSite | null;
 router.use(async ctx => {
-  // ctx.log.setOptions({ prefix: "Cults", logger: new LoggerText({ skipTime: false })})
-  ctx.log.setOptions({ prefix: "Cults", logger: new LoggerText({ skipTime: false })})
+  ctx.log.setOptions({ prefix: "Cults"})
   store = await KeyValueStore.open('cults');
   crawlSite = await CrawlSiteRepository.get('cults');
 });
@@ -43,37 +42,21 @@ router.addDefaultHandler(async ({ request, page, crawler, log }) => {
     store.setValue('_lasturl', request.url);
 });
 
-router.addHandler('detail', async ({ crawler, request, page, log }) => {
+router.addHandler('detail', async ({ request, page, log }) => {
     log.info(`Detail handler: processing: ${request.url}`)
     const id = getIdFromUrl(page.url());
     if (id === '') {
-        log.info('Id not found on detail page', { id });
+        log.info('Already crawled', { id });
         return;
     }
 
     log.info(`Detail handler: waiting for DOM`)
     await page.waitForLoadState('load', { timeout: 30000 });
 
-    // Pause between 1 and 10s
-    await new Promise((res) => setTimeout(() => res(1), Math.random() * 1000));
-
-    await queueAssetLinks(crawler, page, log);
-
     log.info(`Detail handler: scraping title`)
-    const titleLocator = page.locator('h1');
-    const title: string = (await titleLocator.first().textContent({ timeout: 30000 }) + '')?.trim();
-
+    const title: string = (await page.locator('h1').textContent({ timeout: 30000 }) + '')?.trim();
     log.info(`Detail handler: scraping url`)
-    let sitePreviewUrl = '';
-    let imgLocator = page.locator('.product-pane img.painting-image');
-    if (await imgLocator.count() > 0) {
-      sitePreviewUrl = await imgLocator.first().getAttribute('src', { timeout: 30000 }) + '';
-    } else {
-      imgLocator = page.locator('.product-pane picture source');
-      if (await imgLocator.count() > 0) {
-        sitePreviewUrl = await imgLocator.first().getAttribute('srcset', { timeout: 30000 }) + '';
-      }
-    }
+    const sitePreviewUrl = await page.locator('.product-pane img.painting-image').first().getAttribute('src', { timeout: 30000 }) + '';
     
     log.info(`Detail handler: scraping tags`)
     const tagLocator = page.locator('h2 + ul.inline-list');
@@ -104,25 +87,12 @@ router.addHandler('detail', async ({ crawler, request, page, log }) => {
     const assetCreatedOnDateText = assetCreatedOnText.substring(0, assetCreatedOnText.indexOf(' '));
     const assetCreatedOn = new Date(assetCreatedOnDateText);
 
-    log.info("Detail handler: scraping price")
-    const priceLocator = page.locator(".creation-infos form .btn-third");
-    let free = true;
-    if (await priceLocator.count() > 0) {
-      free = /free/gi.test((await priceLocator.first().innerText()));
-    }
-
-    log.info(`Detail handler: fields: 
-      title ${title}
-      url: ${request.loadedUrl}
-      previewUrl: ${sitePreviewUrl}
-      tags: ${tags}
-      createdOn: ${assetCreatedOn}
-      free: ${free}`);
+    log.info(`Detail handler: fields: ${title}`, { url: request.loadedUrl, sitePreviewUrl, tags, assetCreatedOn });
 
     log.info(`Detail handler: downloading image`);
     const resourceId = uuidv4();
     const imageFilePath = await ImageService.downloadImage(crawlSite!.name, sitePreviewUrl + '') + '';
-
+    
     log.info(`Detail handler: uploading image`);
     const previewUrl = await ImageService.uploadImageToS3(resourceId, imageFilePath);
 
@@ -136,8 +106,7 @@ router.addHandler('detail', async ({ crawler, request, page, log }) => {
         sitePreviewUrl,
         tags: tags.trim(),
         assetCreatedOn,
-        resourceId,
-        free
+        resourceId
     };
     try {
         log.info(`Detail handler: saving asset`);
@@ -151,7 +120,7 @@ router.addHandler('detail', async ({ crawler, request, page, log }) => {
 });
 
 async function queueAssetLinks(crawler: PlaywrightCrawler, page: Page, log: any) {
-    const locator = await page.locator('a[href*="/en/3d-model/"]');
+    const locator = await page.locator('a.tbox-thumb');
     const linkCount = await locator.count();
     const linkQueue = [];
     for (let i = 0; i < linkCount; i++) {
@@ -161,15 +130,7 @@ async function queueAssetLinks(crawler: PlaywrightCrawler, page: Page, log: any)
         const alreadyCrawled = await CrawlAssetRepository.exists(id);
         //if (href && id && !await store.getValue(id)) {
         if (href && id && !alreadyCrawled) {
-          if (href.startsWith('https')) {
-            linkQueue.push(href);
-          } else if (href.startsWith('https//')) {
-            linkQueue.push(href.replace('https//', 'https://'));
-          } else if (href.startsWith('//')) {
-            linkQueue.push('https:' + href);
-          } else {
-            linkQueue.push('https://cults3d.com' + href);
-          }
+          linkQueue.push('https://cults3d.com' + href);
         }
     }
 

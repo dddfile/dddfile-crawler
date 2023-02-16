@@ -1,5 +1,5 @@
 // For more information, see https://crawlee.dev/
-import { Configuration, KeyValueStore, PlaywrightCrawler, ProxyConfiguration } from 'crawlee';
+import { Configuration, createRequestOptions, KeyValueStore, PlaywrightCrawler, ProxyConfiguration } from 'crawlee';
 import { router } from './routes.js';
 import Apify from 'crawlee';
 
@@ -10,7 +10,14 @@ config.set('defaultDatasetId', 'thingiverse');
 
 const store = await KeyValueStore.open('thingiverse');
 let lastcrawledUrl = (await store.getValue('_lasturl') as string) || 'https://www.thingiverse.com/search?page=1&per_page=20&sort=newest&type=things&q=';
-const startUrls = [lastcrawledUrl];
+// const startUrls = [lastcrawledUrl];
+
+const startUrls:string[] = [];
+const template = 'https://www.thingiverse.com/thing:{num}';
+while (startUrls.length < +(process.env.CRAWLER_NUM_CRAWLS || 100)) {
+  const thingId = Math.trunc(Math.random() * 5848433);
+  startUrls.push(template.replace('{num}', thingId + ''));
+}
 
 const crawler = new PlaywrightCrawler({
     proxyConfiguration: new ProxyConfiguration({ proxyUrls: [
@@ -27,15 +34,14 @@ const crawler = new PlaywrightCrawler({
     ] }),
     requestHandler: router,
     maxRequestsPerCrawl: +(process.env.CRAWLER_NUM_CRAWLS || 100),
-    maxConcurrency: +(process.env.CRAWLER_CONCURRENCY || 2)
+    maxConcurrency: +(process.env.CRAWLER_CONCURRENCY || 2),
+    maxRequestRetries: 1
 });
 log.info(`Crawler options. maxRequests: ${+(process.env.CRAWLER_NUM_CRAWLS || 100)}, maxConcurrency: ${+(process.env.CRAWLER_CONCURRENCY || 2)}`)
 
 class ThingverseCralwer {
-
-  async run() {
-    await crawler.run(startUrls);
-  }
+  // run = () => crawler.run(startUrls);
+  run = () => crawler.run(createRequestOptions(startUrls, { label: "detail" }))
 }
 
 export default new ThingverseCralwer();

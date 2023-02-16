@@ -7,4 +7,5 @@ apify_storage
 crawlee_storage
 storage
 .env.production
-log.txt
+logs
+storage*

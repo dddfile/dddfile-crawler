@@ -1,4 +1,4 @@
-import { Dataset, createPlaywrightRouter, Log, KeyValueStore, enqueueLinks, PlaywrightCrawler, CrawlerAddRequestsOptions, RequestOptions, createRequestOptions, Dictionary } from 'crawlee';
+import { Dataset, createPlaywrightRouter, Log, KeyValueStore, enqueueLinks, PlaywrightCrawler, CrawlerAddRequestsOptions, RequestOptions, createRequestOptions, Dictionary, LoggerText } from 'crawlee';
 import { v4 as uuidv4 } from 'uuid';
 import { Locator, Page } from 'playwright';
 import ImageService from '../services/imageservice.js';
@@ -10,7 +10,7 @@ export const router = createPlaywrightRouter();
 let store: KeyValueStore;
 let crawlSite: Entities.CrawlSite | null;
 router.use(async ctx => {
-    ctx.log.setOptions({ prefix: "Thing"});
+    ctx.log.setOptions({ prefix: "Thing", logger: new LoggerText({ skipTime: false })});
     store = await KeyValueStore.open('thingiverse');
     crawlSite = await CrawlSiteRepository.get('thingiverse');
 });
@@ -54,16 +54,31 @@ router.addDefaultHandler(async ({ request, page, crawler, log }) => {
     store.setValue('_lasturl', request.url);
 });
 
-router.addHandler('detail', async ({ request, page, log }) => {
-    log.info(`Detail handler: processing: ${request.url}`)
+router.addHandler('detail', async ({ crawler, request, response, page, log }) => {
+    log.info(`Detail handler: processing: ${request.url}. Status: ${response?.status()}`)
+    if (response?.status() === 404) {
+        log.info(`Detail handler: page not found: ${request.url}`);
+        return;
+    }
     const id = getIdFromUrl(page.url());
     if (id === '') {
-        log.info('Already crawled', { id });
+        log.info('Detail handler: no ID found');
         return;
-    }    
+    }
+
+    await queueAssetLinks(crawler, page, log);
+
+    const alreadyCrawled = await CrawlAssetRepository.exists(id);
+    if (alreadyCrawled) {
+        log.info(`Detail handler: already crawled ${id}`);
+        return;
+    }
 
     log.info(`Detail handler: waiting for DOM`)
     await page.waitForLoadState('load', { timeout: 30000 });
+
+    // Pause between 1 and 10s
+    await new Promise((res) => setTimeout(() => res(1), Math.random() * 1000));
 
     log.info(`Detail handler: scraping title`)
     const title: string = await page.locator('div[class*=ThingTitle__modelName]').textContent({ timeout: 30000 }) + '';
@@ -98,7 +113,8 @@ router.addHandler('detail', async ({ request, page, log }) => {
         sitePreviewUrl,
         tags: tags.trim(),
         assetCreatedOn,
-        resourceId
+        resourceId,
+        free: true
     };
     try {
         log.info(`Detail handler: saving asset`);
@@ -145,14 +161,23 @@ async function queueAssetLinks(crawler: PlaywrightCrawler, page: Page, log: any)
         const link = locator.nth(i);
         const href = await link.getAttribute('href');
         const id = getIdFromUrl(href);
-        const alreadyCrawled = await CrawlAssetRepository.exists(id);
-        //if (href && id && !await store.getValue(id)) {
-        if (href && id && !alreadyCrawled) {
+        // const alreadyCrawled = await CrawlAssetRepository.exists(id);
+        // //if (href && id && !await store.getValue(id)) {
+        // if (href && id && !alreadyCrawled) {
+        //     linkQueue.push(href);
+        // }
+        if (href && id) {
             linkQueue.push(href);
         }
     }
 
-    log.info(`Enqueueing ${linkQueue.length} new URLs`);
+    const moreLink = await page.locator('[class*=Pagination__pagination] a', { hasText: 'More' }).getAttribute('href') || '';
+    if (moreLink !== '') {
+        log.info(`QueueLinks: adding more link ${moreLink}`);
+        await crawler.addRequests([moreLink]);
+    }
+
+    log.info(`QueueLinks: enqueueing ${linkQueue.length} new URLs`);
     if (linkQueue.length > 0) {
         await crawler.addRequests(createRequestOptions(linkQueue, { label: "detail" }));
     }
