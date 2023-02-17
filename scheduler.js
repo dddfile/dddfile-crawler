@@ -19,7 +19,10 @@ function runTask() {
     process.env[crawler.toUpperCase() + '_ENABLED'] = true;
     process.env.CRAWLEE_STORAGE_DIR = `./storage_${crawler}`;
     logFilePath = `./logs/${crawler}/${timestamp}.txt`;
-    if (!fs.existsSync(`./logs/${crawler}`)){
+    if (!fs.existsSync(`./logs`)) {
+      fs.mkdirSync(`./logs`);
+    }
+    if (!fs.existsSync(`./logs/${crawler}`)) {
       fs.mkdirSync(`./logs/${crawler}`);
     }
   }
