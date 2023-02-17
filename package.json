@@ -7,7 +7,7 @@
         "@aws-sdk/client-s3": "^3.259.0",
         "crawlee": "^3.0.0",
         "cron": "^2.2.0",
-        "dddfile-data": "file:lib/dddfile-data-0.0.1.tgz",
+        "dddfile-data": "file:./lib/dddfile-data-0.0.1.tgz",
         "dotenv": "^16.0.3",
         "playwright": "*",
         "uuid": "^9.0.0"
