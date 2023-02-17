@@ -1,7 +1,7 @@
 import ThingverseCralwer from './thingverse/crawler.js'
 import CultsCralwer from './cults3d/crawler.js'
 import dotenv from 'dotenv';
-import { AppDataSource } from 'dddfile-data/src/data-source.js';
+import { AppDataSource } from 'dddfile-data/dist/data-source.js';
 import { getEnv, Type } from './util.js';
 
 let path = ".env." + (process.env.NODE_ENV || "local");

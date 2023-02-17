@@ -7,7 +7,7 @@
         "@aws-sdk/client-s3": "^3.259.0",
         "crawlee": "^3.0.0",
         "cron": "^2.2.0",
-        "dddfile-data": "github:dddfile/dddfile-data#main",
+        "dddfile-data": "file:lib/dddfile-data-0.0.1.tgz",
         "dotenv": "^16.0.3",
         "playwright": "*",
         "uuid": "^9.0.0"
@@ -26,7 +26,8 @@
         "start:local": "cross-env NODE_ENV=local npm run start:dev",
         "start:local:prod": "cross-env NODE_ENV=production npm run start:dev",
         "build": "tsc",
-        "test": "echo \"Error: oops, the actor has no tests yet, sad!\" && exit 1"
+        "start:schedule:thing": "node scheduler crawler=thing",
+        "start:schedule:cults": "node scheduler crawler=cults"
     },
     "author": "It's not you it's me",
     "license": "ISC"

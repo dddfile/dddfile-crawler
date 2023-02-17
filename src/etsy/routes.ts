@@ -2,8 +2,8 @@ import { Dataset, createPlaywrightRouter, Log, KeyValueStore, enqueueLinks, Play
 import { v4 as uuidv4 } from 'uuid';
 import { Locator, Page } from 'playwright';
 import ImageService from '../services/imageservice.js';
-import * as Entities from 'dddfile-data/src/entity/index.js';
-import { CrawlAssetRepository, CrawlSiteRepository } from 'dddfile-data/src/repository/index.js';
+import * as Entities from 'dddfile-data/dist/entity/index.js';
+import { CrawlAssetRepository, CrawlSiteRepository } from 'dddfile-data/dist/repository/index.js';
 
 export const router = createPlaywrightRouter();
 
