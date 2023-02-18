@@ -28,7 +28,7 @@ function runTask() {
   }
 
   var logStream = fs.createWriteStream(logFilePath);
-  const command = `npm run start:local:prod`;
+  const command = process.env.SCHEDULER_SCRIPT;
   console.log('Running: ' + command)
   var child = exec(command, (error, stdout, stderr) => {
     if (error) {

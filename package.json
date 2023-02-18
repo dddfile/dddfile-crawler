@@ -11,12 +11,11 @@
         "dddfile-data": "file:./lib/dddfile-data-0.0.1.tgz",
         "dotenv": "^16.0.3",
         "playwright": "*",
-        "ts-node": "10.9.1",
         "uuid": "^9.0.0"
     },
     "devDependencies": {
-        "@apify/tsconfig": "^0.1.0",
         "@types/uuid": "^9.0.0",
+        "ts-node": "10.9.1",
         "typescript": "^4.7.4"
     },
     "scripts": {
@@ -25,6 +24,7 @@
         "start:dev": "ts-node-esm src/main.ts",
         "start:local": "cross-env NODE_ENV=local npm run start:dev",
         "start:local:prod": "cross-env NODE_ENV=production npm run start:dev",
+        "start:ci": "cross-env NODE_ENV=production npm run start:prod",
         "build": "tsc",
         "start:schedule:thing": "node scheduler crawler=thing",
         "start:schedule:cults": "node scheduler crawler=cults"
