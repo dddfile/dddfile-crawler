@@ -46,8 +46,9 @@ RUN npm --quiet set progress=false \
 # Since we do this after NPM install, quick build will be really fast
 # for most source file changes.
 COPY --chown=myuser . ./
-
+COPY --chown=myuser lib ./lib
 
 # Run the image. If you know you won't need headful browsers,
 # you can remove the XVFB start script for a micro perf gain.
-CMD ./start_xvfb_and_run_cmd.sh && npm run start:prod --silent
+#CMD ./start_xvfb_and_run_cmd.sh && npm run start:prod --silent
+CMD ./start_xvfb_and_run_cmd.sh && node schedulre crawler=thing
