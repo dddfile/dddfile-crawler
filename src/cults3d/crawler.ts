@@ -24,7 +24,10 @@ const crawler = new PlaywrightCrawler({
 log.info(`Crawler options. maxRequests: ${+(process.env.CRAWLER_NUM_CRAWLS || 100)}, maxConcurrency: ${+(process.env.CRAWLER_CONCURRENCY || 2)}`)
 
 class CultsCrawler {
-  run = () => crawler.run(startUrls);
+  run = () => {
+    log.info('Starting crawl');
+    crawler.run(startUrls);
+  }
 }
 
 export default new CultsCrawler();

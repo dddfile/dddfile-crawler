@@ -19,4 +19,8 @@ if (getEnv("CULTS_ENABLED", Type.boolean)) {
   promises.push(CultsCralwer.run());
 }
 
-await Promise.all(promises);
+try {
+  await Promise.all(promises);
+} catch (e) {
+  console.error('Error running crawlers', e);
+}

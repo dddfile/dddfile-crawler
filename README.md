@@ -6,3 +6,6 @@ If you're looking for examples or want to learn more visit:
 
 - [Documentation](https://crawlee.dev/api/playwright-crawler/class/PlaywrightCrawler)
 - [Examples](https://crawlee.dev/docs/examples/playwright-crawler)
+
+
+docker compose -f "docker-compose.yml" -f docker-compose.override.yml  up -d --build

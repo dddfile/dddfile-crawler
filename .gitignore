@@ -9,3 +9,4 @@ storage
 .env.production
 logs
 storage*
+docker-compose.override.yml

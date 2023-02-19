@@ -40,7 +40,8 @@ RUN npm --quiet set progress=false \
     && echo "Node.js version:" \
     && node --version \
     && echo "NPM version:" \
-    && npm --version
+    && npm --version \
+    && npx playwright install
 
 # Next, copy the remaining files and directories with the source code.
 # Since we do this after NPM install, quick build will be really fast
@@ -51,4 +52,4 @@ COPY --chown=myuser lib ./lib
 # Run the image. If you know you won't need headful browsers,
 # you can remove the XVFB start script for a micro perf gain.
 #CMD ./start_xvfb_and_run_cmd.sh && npm run start:prod --silent
-CMD ./start_xvfb_and_run_cmd.sh && node schedulre crawler=thing
+CMD ./start_xvfb_and_run_cmd.sh && node scheduler crawler=thing

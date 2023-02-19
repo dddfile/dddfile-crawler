@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  dddfile-crawler:
+    image: dddfile-crawler
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    networks:
+      - app-network
+networks:
+  app-network:
+    driver: bridge

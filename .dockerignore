@@ -5,6 +5,8 @@
 apify_storage
 crawlee_storage
 storage
+storage_*
+logs
 
 # installed files
 node_modules

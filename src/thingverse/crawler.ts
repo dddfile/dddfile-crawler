@@ -41,7 +41,10 @@ log.info(`Crawler options. maxRequests: ${+(process.env.CRAWLER_NUM_CRAWLS || 10
 
 class ThingverseCralwer {
   // run = () => crawler.run(startUrls);
-  run = () => crawler.run(createRequestOptions(startUrls, { label: "detail" }))
+  run = () => {
+    log.info('Starting crawl');
+    crawler.run(createRequestOptions(startUrls, { label: "detail" }))
+  }
 }
 
 export default new ThingverseCralwer();

@@ -1,5 +1,5 @@
 // import cron from 'node-cron';
-import { exec }  from 'child_process';
+import { exec, spawn }  from 'child_process';
 import fs from 'fs';
 
 let cults, thing = false;
@@ -16,6 +16,7 @@ function runTask() {
 
   let logFilePath = `./logs/${timestamp}.txt`;
   if (crawler) {
+    console.log(`${crawler} enabled`);
     process.env[crawler.toUpperCase() + '_ENABLED'] = true;
     process.env.CRAWLEE_STORAGE_DIR = `./storage_${crawler}`;
     logFilePath = `./logs/${crawler}/${timestamp}.txt`;
@@ -25,28 +26,44 @@ function runTask() {
     if (!fs.existsSync(`./logs/${crawler}`)) {
       fs.mkdirSync(`./logs/${crawler}`);
     }
+  } else {
+    throw new Error('Crawler selection required');
   }
 
   var logStream = fs.createWriteStream(logFilePath);
-  const command = process.env.SCHEDULER_SCRIPT;
+  const command = process.env.SCHEDULER_SCRIPT || 'start:local:prod';
   console.log('Running: ' + command)
-  var child = exec(command, (error, stdout, stderr) => {
-    if (error) {
-      console.error(`error: ${error.message}`);
-      return;
-    }
+  // var child = exec(command, {maxBuffer: 1024 * 1000}, (error, stdout, stderr) => {
+  //   if (error) {
+  //     console.error(`error: ${error.message}`);
+  //     return;
+  //   }
   
-    if (stderr) {
-      console.error(`stderr: ${stderr}`);
-      return;
-    }
+  //   if (stderr) {
+  //     console.error(`stderr: ${stderr}`);
+  //     return;
+  //   }
   
-    console.log(`stdout:\n${stdout}`);
+  //   console.log(`stdout:\n${stdout}`);
+  // });
+  // child.stdout.pipe(logStream);
+  // child.stderr.on("data", chunk => logStream.write(chunk));
+  // child.on("exit", (code) => {
+  //   console.log("Scraper finished with code " + code);
+  // });
+  var child = spawn("npm", ["run", command]);
+
+  child.stdout.on('data', function (data) {
+    console.log('stdout: ' + data);
   });
-  child.stdout.pipe(logStream);
-  child.stderr.on("data", chunk => logStream.write(chunk));
-  child.on("exit", (code) => {
-    console.log("Scraper finished with code " + code);
+
+  child.stderr.on('data', function (data) {
+    console.log('stderr: ' + data);
+    logStream.write(data);
+  });
+
+  child.on('close', function (code) {
+      console.log('child process exited with code ' + code);
   });
 }
 
