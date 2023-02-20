@@ -10,7 +10,6 @@
         "cross-env": "^7.0.3",
         "dddfile-data": "file:./lib/dddfile-data-0.0.1.tgz",
         "dotenv": "^16.0.3",
-        "express": "^4.18.2",
         "playwright": "*",
         "uuid": "^9.0.0"
     },
