@@ -11,6 +11,8 @@ if (process.argv[2]) {
   thing = crawler === 'thing';
 }
 
+console.log(`Database host: ${process.env.DATABASE_HOST}`);
+
 function runTask() {
   const timestamp = new Date().toLocaleString("sv").replace(' ', 'T').replaceAll(':', '-');
 
