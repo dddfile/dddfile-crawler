@@ -9,11 +9,11 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get('/health', (req, res) => {
+router.get('/', (req, res) => {
   res.status(200).send('Ok');
 });
 
 app.use('/', router);
 
 const server = http.createServer(app);
-server.listen(3000);
+server.listen(8080);
