@@ -76,6 +76,10 @@ import { CronJob } from 'cron';
 const schedule = process.env.CRON_SCHEDULE || "15 0-8/2 * * *";
 console.log(`Run crawler on schedule: ${schedule}`);
 const job = new CronJob(schedule, function() {
+  if (job.running) {
+    console.log('Previous job still running. Skip this one');
+    return;
+  }
   console.log('Running task')
 	runTask();
 });
