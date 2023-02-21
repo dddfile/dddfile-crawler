@@ -73,8 +73,9 @@ runTask();
 
 import { CronJob } from 'cron';
 
-console.log('Run crawler every 15th minute of every 2 hours');
-const job = new CronJob('15 0-8/2 * * *', function() {
+const schedule = process.env.CRON_SCHEDULE || "15 0-8/2 * * *";
+console.log(`Run crawler on schedule: ${schedule}`);
+const job = new CronJob(schedule, function() {
   console.log('Running task')
 	runTask();
 });
