@@ -25,8 +25,8 @@ router.addDefaultHandler(async ({ request, page, crawler, log }) => {
     // Wait 10s
     await new Promise((res) => setTimeout(() => res(1), 5000));
     
-    log.info(`Default handler: taking screenshot`)
-    await saveScreenshot(page, request.url);
+    // log.info(`Default handler: taking screenshot`)
+    // await saveScreenshot(page, request.url);
 
     log.info(`Default handler: looking for detail links`)
     await queueAssetLinks(crawler, page, log);

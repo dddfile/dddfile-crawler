@@ -33,8 +33,8 @@ router.addDefaultHandler(async ({ request, page, crawler, log }) => {
     // log.info(`Default handler: waiting for more link`)
     // await page.waitForSelector('[class*=Pagination__pagination] a:nth-child(7)', { timeout: 30000 });
     
-    log.info(`Default handler: taking screenshot`)
-    await saveScreenshot(page, request.url);
+    // log.info(`Default handler: taking screenshot`)
+    // await saveScreenshot(page, request.url);
 
     // await enqueueLinks({
     //     globs: ['https://thingiverse.com/thing:**', 'https://www.thingiverse.com/thing:**'],
@@ -123,7 +123,8 @@ router.addHandler('detail', async ({ crawler, request, response, page, log }) =>
         log.exception(e as Error, 'Unable to save asset');
     }
 
-    await store.setValue(`${id}`, await page.content(), { contentType: 'text/html'});
+    // log.info(`Detail handler: saving page html`)
+    // await store.setValue(`${id}`, await page.content(), { contentType: 'text/html'});
 
     // await store.setValue(id, {
     //     url: request.loadedUrl,
@@ -135,23 +136,6 @@ router.addHandler('detail', async ({ crawler, request, response, page, log }) =>
     // });
     await store.setValue('_lastid', id);
 });
-
-// router.addHandler('list', async ({ crawler, request, page, log}) => {
-//     // console.log('Proxy info', proxyInfo?.url);
-//     log.info(`List handler: processing: ${request.url}`)
-//     await page.waitForSelector('[class*=Pagination__pagination] a:nth-child(7)', { timeout: 10000 });
-//     await page.waitForLoadState('domcontentloaded');
-//     await saveScreenshot(page, request.url);
-
-//     // await enqueueLinks({
-//     //     selector: '[class*=Pagination__pagination] a:nth-child(7)', // More button,
-//     //     label: 'list',
-//     // });
-//     await queueAssetLinks(crawler, page, log);
-//     const moreLink = await page.locator('[class*=Pagination__pagination] a', { hasText: 'More' }).getAttribute('href') || '';
-//     await crawler.addRequests([moreLink]);
-//     store.setValue('_lasturl', request.url);
-// });
 
 async function queueAssetLinks(crawler: PlaywrightCrawler, page: Page, log: any) {
     const locator = await page.locator('a[class*=ThingCardBody__cardBodyWrapper]');
@@ -188,8 +172,6 @@ function getIdFromUrl(url: string | null): string {
     return url.substring(url.lastIndexOf(':') + 1) + '';
 }
 async function saveScreenshot(page: Page, url: string): Promise<void> {
-    return;
-
     const screenshot = await page.screenshot();
     // Convert the URL into a valid key
     let key = url.replace('https://wwww.thingverse.com', '').replace(/[:/&?=]/g, '_');

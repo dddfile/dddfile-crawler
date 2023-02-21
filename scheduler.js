@@ -56,11 +56,11 @@ function runTask() {
   var child = spawn("npm", ["run", command]);
 
   child.stdout.on('data', function (data) {
-    console.log('stdout: ' + data);
+    console.log(data);
   });
 
   child.stderr.on('data', function (data) {
-    console.log('stderr: ' + data);
+    console.log(data);
     logStream.write(data);
   });
 
