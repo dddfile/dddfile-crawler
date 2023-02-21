@@ -41,7 +41,7 @@ RUN npm --quiet set progress=false \
     && node --version \
     && echo "NPM version:" \
     && npm --version \
-    && npx playwright install
+    && npx playwright install chromium
 
 # Next, copy the remaining files and directories with the source code.
 # Since we do this after NPM install, quick build will be really fast
