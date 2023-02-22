@@ -13,7 +13,7 @@ if (process.argv[2]) {
 
 console.log(`Database host: ${process.env.DATABASE_HOST}`);
 
-function runTask() {
+function runTask(job) {
   const timestamp = new Date().toLocaleString("sv").replace(' ', 'T').replaceAll(':', '-');
 
   let logFilePath = `./logs/${timestamp}.txt`;
@@ -66,10 +66,9 @@ function runTask() {
 
   child.on('close', function (code) {
       console.log('child process exited with code ' + code);
+      job.running = false;
   });
 }
-
-runTask();
 
 import { CronJob } from 'cron';
 
@@ -79,13 +78,12 @@ const job = new CronJob(schedule, function() {
   if (job.running) {
     console.log('Previous job still running. Skip this one');
     return;
-  }
+  } 
   console.log('Running task')
-	runTask();
+	runTask(this);
 }, () => {
   // onComplete handler
   console.log('Cron job complete');
-  job.running = false;
-});
+}, undefined, undefined, undefined, true);
 
 job.start();
