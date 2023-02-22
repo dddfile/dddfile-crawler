@@ -82,5 +82,10 @@ const job = new CronJob(schedule, function() {
   }
   console.log('Running task')
 	runTask();
+}, () => {
+  // onComplete handler
+  console.log('Cron job complete');
+  job.running = false;
 });
+
 job.start();
