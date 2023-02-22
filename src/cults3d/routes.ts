@@ -157,7 +157,7 @@ async function queueAssetLinks(crawler: PlaywrightCrawler, page: Page, log: any)
     const linkQueue = [];
     for (let i = 0; i < linkCount; i++) {
         const link = locator.nth(i);
-        const href = await link.getAttribute('href');
+        const href = await link.getAttribute('href', { timeout: 60000 });
         const id = getIdFromUrl(href);
         const alreadyCrawled = await CrawlAssetRepository.exists(id);
         //if (href && id && !await store.getValue(id)) {
