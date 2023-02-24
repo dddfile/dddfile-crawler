@@ -53,20 +53,23 @@ function runTask(job) {
   // child.on("exit", (code) => {
   //   console.log("Scraper finished with code " + code);
   // });
-  var child = spawn("npm", ["run", command]);
+  return new Promise((resolve) => {
+    var child = spawn("npm", ["run", command]);
 
-  child.stdout.on('data', function (data) {
-    console.log(data + '');
-  });
+    child.stdout.on('data', function (data) {
+      console.log(data + '');
+    });
 
-  child.stderr.on('data', function (data) {
-    console.log(data + '');
-    logStream.write(data);
-  });
+    child.stderr.on('data', function (data) {
+      console.log(data + '');
+      logStream.write(data);
+    });
 
-  child.on('close', function (code) {
-      console.log('child process exited with code ' + code);
-      job.running = false;
+    child.on('close', function (code) {
+        console.log('child process exited with code ' + code);
+        logStream.close();
+        resolve();
+    });
   });
 }
 
@@ -74,13 +77,9 @@ import { CronJob } from 'cron';
 
 const schedule = process.env.CRON_SCHEDULE || "15 0-8/2 * * *";
 console.log(`Run crawler on schedule: ${schedule}`);
-const job = new CronJob(schedule, function() {
-  if (this.running) {
-    console.log('Previous job still running. Skip this one');
-    return;
-  } 
+const job = new CronJob(schedule, async function() {
   console.log('Running task')
-	runTask(this);
+	await runTask(this);
 }, () => {
   // onComplete handler
   console.log('Cron job complete');
