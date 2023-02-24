@@ -17,7 +17,7 @@ router.use(async ctx => {
 });
 
 router.addDefaultHandler(async ({ request, page, crawler, log }) => {
-    // log.info(`Proxy info ${proxyInfo?.url});
+    page.setDefaultNavigationTimeout(+(process.env.TIMEOUT || '120'));
     log.info(`Default handler: processing: ${request.url}`)
     log.info(`Default handler: waiting for DOM`)
     await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
