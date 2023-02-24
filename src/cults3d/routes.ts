@@ -44,7 +44,7 @@ router.addDefaultHandler(async ({ request, page, crawler, log }) => {
 });
 
 router.addHandler('detail', async ({ crawler, request, page, log }) => {
-    page.setDefaultTimeout(60);
+    page.setDefaultNavigationTimeout(+(process.env.TIMEOUT || '120'));
     log.info(`Detail handler: processing: ${request.url}`)
     const id = getIdFromUrl(page.url());
     if (id === '') {
