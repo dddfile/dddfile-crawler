@@ -20,6 +20,7 @@ const crawler = new PlaywrightCrawler({
     maxRequestsPerCrawl: +(process.env.CRAWLER_NUM_CRAWLS || 100),
     maxConcurrency: +(process.env.CRAWLER_CONCURRENCY || 2),
     navigationTimeoutSecs: +(process.env.TIMEOUT || 120),
+    requestHandlerTimeoutSecs: +(process.env.TIMEOUT || 120),
 });
 log.info(`Crawler options. maxRequests: ${+(process.env.CRAWLER_NUM_CRAWLS || 100)}, maxConcurrency: ${+(process.env.CRAWLER_CONCURRENCY || 2)}`)
 
