@@ -17,7 +17,6 @@ router.use(async ctx => {
 });
 
 router.addDefaultHandler(async ({ request, page, crawler, log }) => {
-    page.setDefaultNavigationTimeout(+(process.env.TIMEOUT || '120'));
     log.info(`Default handler: processing: ${request.url}`)
     log.info(`Default handler: waiting for DOM`)
     await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
@@ -44,7 +43,6 @@ router.addDefaultHandler(async ({ request, page, crawler, log }) => {
 });
 
 router.addHandler('detail', async ({ crawler, request, page, log }) => {
-    page.setDefaultNavigationTimeout(+(process.env.TIMEOUT || '120'));
     log.info(`Detail handler: processing: ${request.url}`)
     const id = getIdFromUrl(page.url());
     if (id === '') {
