@@ -1,0 +1,28 @@
+version: '3.4'
+
+services:
+  dddfile-crawler-thing:
+    image: dddfile-crawler
+    container_name: crawler-thing
+    entrypoint: node scheduler crawler=thing
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    # networks:
+    #   - app-network
+    mem_reservation: 1.7g
+    restart: unless-stopped
+  dddfile-crawler-cults:
+    image: dddfile-crawler
+    container_name: crawler-cults
+    entrypoint: node scheduler crawler=cults
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    # networks:
+    #   - app-network
+    mem_reservation: 1.7g
+    restart: unless-stopped
+# networks:
+#   app-network:
+#     driver: bridge

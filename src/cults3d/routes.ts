@@ -17,6 +17,7 @@ router.use(async ctx => {
 });
 
 router.addDefaultHandler(async ({ request, page, crawler, log }) => {
+    page.setDefaultNavigationTimeout(+(process.env.CRAWLER_TIMEOUT || 120) * 1000);
     log.info(`Default handler: processing: ${request.url}`)
     log.info(`Default handler: waiting for DOM`)
     await page.waitForLoadState('domcontentloaded', { timeout: 30000 });
@@ -53,8 +54,8 @@ router.addHandler('detail', async ({ crawler, request, page, log }) => {
     log.info(`Detail handler: waiting for DOM`)
     await page.waitForLoadState('load', { timeout: 30000 });
 
-    // Pause between 1 and 10s
-    await new Promise((res) => setTimeout(() => res(1), Math.random() * 1000));
+    // Pause between 1 and 5s
+    await new Promise((res) => setTimeout(() => res(1), Math.random() * 5000));
 
     await queueAssetLinks(crawler, page, log);
 
@@ -78,7 +79,7 @@ router.addHandler('detail', async ({ crawler, request, page, log }) => {
     const tagLocator = page.locator('h2 + ul.inline-list');
     let tags;
     if (await tagLocator.count() > 0) {
-      const tagContent = await tagLocator.textContent() || '';
+      const tagContent = await tagLocator.textContent({ timeout: 30000 }) || '';
       tags = tagContent.split('\n')
         .map(v => v.trim())
         .reduce((prev, cur) => {
@@ -97,7 +98,7 @@ router.addHandler('detail', async ({ crawler, request, page, log }) => {
     }
     
     log.info(`Detail handler: scraping created by`)
-    let assetCreatedOnText = await page.locator('li', { hasText: 'publication date'}).innerText();
+    let assetCreatedOnText = await page.locator('li', { hasText: 'publication date'}).innerText({ timeout: 30000 });
     // parse " Publication date: 2023-02-03 at 16:00"
     assetCreatedOnText = assetCreatedOnText.replace("Publication date: ", "").replace("at ", "").trim();
     const assetCreatedOnDateText = assetCreatedOnText.substring(0, assetCreatedOnText.indexOf(' '));
@@ -107,7 +108,7 @@ router.addHandler('detail', async ({ crawler, request, page, log }) => {
     const priceLocator = page.locator(".creation-infos form .btn-third");
     let free = true;
     if (await priceLocator.count() > 0) {
-      free = /free/gi.test((await priceLocator.first().innerText()));
+      free = /free/gi.test((await priceLocator.first().innerText({ timeout: 30000 })));
     }
 
     log.info(`Detail handler: fields: 
